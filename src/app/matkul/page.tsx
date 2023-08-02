@@ -6,13 +6,13 @@ import "primeicons/primeicons.css";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
 import { Navbar } from "@/components/Navbar";
 import { updateRender } from "@/util/updateRender";
 import { Dropdown, DropdownProps } from "primereact/dropdown";
 import { fetchAllData } from "@/util/fetchAllData";
 import { MatkulTable } from "./matkulTable";
+import { InputText } from "primereact/inputtext";
 
 export default function page() {
   const [allMatkul, setAllMatkul] = useState<Matkul[]>();
@@ -23,10 +23,10 @@ export default function page() {
     const fetchData = async () => {
       const result = await fetchAllData("matkul");
       if (result.success) {
-        setAllMatkul(result.data);
-      } else {
         console.error("Failed to fetch matkul:", result.errorMsg);
+        return;
       }
+      setAllMatkul(result.data);
     };
 
     fetchData();
@@ -72,13 +72,6 @@ export default function page() {
       />
       <Toolbar start={toolbarContent}></Toolbar>
       <MatkulTable allMatkul={allMatkul} />
-      {/* <DataTable value={allMatkul} sortMode="multiple">
-        <Column field="namaJurusan" header="Nama Jurusan" sortable></Column>
-        <Column field="namaMatkul" header="Nama Matkul"></Column>
-        <Column field="minSemester" header="Semester Minimum" sortable></Column>
-        <Column field="sks" header="SKS" sortable></Column>
-        <Column field="prediksiIndeks" header="Prediksi Indeks"></Column>
-      </DataTable> */}
     </div>
   );
 }
@@ -89,8 +82,8 @@ function AddMatkulDialog(props: {
   onSubmitSuccess: () => void;
 }) {
   const [newMatkulName, setNewMatkulName] = useState("");
-  const [newMatkulSKS, setNewMatkulSKS] = useState(0);
-  const [newMatkulMinSemester, setNewMatkulMinSemester] = useState(0);
+  const [newMatkulSKS, setNewMatkulSKS] = useState("");
+  const [newMatkulMinSemester, setNewMatkulMinSemester] = useState("");
   const [newMatkulPrediksiIndeks, setNewMatkulPrediksiIndeks] = useState("");
   const [selectedJurusan, setSelectedJurusan] = useState<Jurusan | null>(null);
   const [jurusanOptions, setJurusanOptions] = useState<Jurusan[]>([]);
@@ -111,11 +104,7 @@ function AddMatkulDialog(props: {
 
   const selectedJurusanTemplate = (option: Jurusan, props: DropdownProps) => {
     if (option) {
-      return (
-        <div>
-          <div>{option.namaJurusan}</div>
-        </div>
-      );
+      return <div>{option.namaJurusan}</div>;
     }
     return <span>{props.placeholder}</span>;
   };
@@ -147,21 +136,52 @@ function AddMatkulDialog(props: {
           filter
           valueTemplate={selectedJurusanTemplate}
           itemTemplate={jurusanOptionTemplate}
-          // className="w-full md:w-14rem"
         />
         <label htmlFor="selectedJurusan">Nama Jurusan</label>
       </span>
       <span className="p-float-label" style={{ marginTop: "24px" }}>
-        a
+        <InputText
+          id="newMatkulName"
+          value={newMatkulName}
+          onChange={(e) => {
+            setNewMatkulName(e.target.value);
+          }}
+        />
+        <label htmlFor="newMatkulName">Nama Matkul</label>
       </span>
       <span className="p-float-label" style={{ marginTop: "24px" }}>
-        a
+        <InputText
+          id="newMatkulMinSemester"
+          value={newMatkulMinSemester}
+          keyfilter="pint"
+          onChange={(e) => {
+            setNewMatkulMinSemester(e.target.value);
+          }}
+        />
+        <label htmlFor="newMatkulMinSemester">
+          Semester Minimum Pengambilan
+        </label>
       </span>
       <span className="p-float-label" style={{ marginTop: "24px" }}>
-        a
+        <InputText
+          id="newMatkulSKS"
+          value={newMatkulSKS}
+          keyfilter="pint"
+          onChange={(e) => {
+            setNewMatkulSKS(e.target.value);
+          }}
+        />
+        <label htmlFor="newMatkulSKS">SKS</label>
       </span>
       <span className="p-float-label" style={{ marginTop: "24px" }}>
-        a
+        <Dropdown
+          inputId="newMatkulPrediksiIndeks"
+          value={newMatkulPrediksiIndeks}
+          onChange={(e) => setNewMatkulPrediksiIndeks(e.value)}
+          options={["A", "AB", "B", "BC", "C", "D", "E"]}
+          placeholder="Prediksi Indeks"
+        />
+        <label htmlFor="newMatkulPrediksiIndeks">Prediksi Indeks</label>
       </span>
       <Button
         label="Save"
@@ -169,8 +189,8 @@ function AddMatkulDialog(props: {
         disabled={
           newMatkulName === "" ||
           selectedJurusan === null ||
-          newMatkulSKS === 0 ||
-          newMatkulMinSemester === 0 ||
+          newMatkulSKS === "" ||
+          newMatkulMinSemester === "" ||
           newMatkulPrediksiIndeks === ""
         }
         onClick={(e) => {
@@ -179,16 +199,16 @@ function AddMatkulDialog(props: {
               {
                 namaMatkul: newMatkulName,
                 namaJurusan: selectedJurusan!.namaJurusan,
-                sks: newMatkulSKS,
-                minSemester: newMatkulMinSemester,
+                sks: parseInt(newMatkulSKS),
+                minSemester: parseInt(newMatkulMinSemester),
                 prediksiIndeks: newMatkulPrediksiIndeks,
               },
             ]);
             if (result.success) {
-              props.onSubmitSuccess();
-            } else {
               console.error("Failed to fetch jurusan:", result.errorMsg);
+              return;
             }
+            props.onSubmitSuccess();
           };
           postData();
           props.onHide();

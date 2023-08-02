@@ -23,11 +23,11 @@ export default function page() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await fetchAllData("jurusan");
-      if (result.success) {
-        setAllJurusan(result.data);
-      } else {
+      if (!result.success) {
         console.error("Failed to fetch jurusan:", result.errorMsg);
+        return;
       }
+      setAllJurusan(result.data);
     };
 
     fetchData();
@@ -145,11 +145,11 @@ function AddJurusanDialog(props: {
                 namaFakultas: selectedFakultas!.namaFakultas,
               },
             ]);
-            if (result.success) {
-              props.onSubmitSuccess();
-            } else {
-              console.error("Failed to add matkul:", result.errorMsg);
+            if (!result.success) {
+              console.error("Failed to add jurusan:", result.errorMsg);
+              return;
             }
+            props.onSubmitSuccess();
           };
           postData();
           props.onHide();

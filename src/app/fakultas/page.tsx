@@ -23,11 +23,11 @@ export default function page() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await fetchAllData("fakultas");
-      if (result.success) {
-        setAllFakultas(result.data);
-      } else {
+      if (!result.success) {
         alert(`Failed to fetch fakultas: ${result.errorMsg}`);
+        return;
       }
+      setAllFakultas(result.data);
     };
 
     fetchData();
@@ -117,11 +117,11 @@ function AddFakultasDialog(props: {
             const result = await addFakultas([
               { namaFakultas: newFakultasName },
             ]);
-            if (result.success) {
-              props.onSubmitSuccess();
-            } else {
+            if (!result.success) {
               console.error("Failed to add fakultas:", result.errorMsg);
+              return;
             }
+            props.onSubmitSuccess();
           };
           postData();
           props.onHide();
