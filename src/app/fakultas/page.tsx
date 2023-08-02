@@ -10,28 +10,28 @@ import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
-
-interface Fakultas {
-  namaFakultas: string;
-}
+import { Navbar } from "@/components/Navbar";
+import { updateRender } from "@/util/updateRender";
+import { fetchAllData } from "@/util/fetchAllData";
+import { Toast } from "primereact/toast";
 
 export default function page() {
   const [allFakultas, setAllFakultas] = useState<Fakultas[]>();
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [renderHelper, setRenderHelper] = useState(false);
+  const [tableRenderHelper, setTableRenderHelper] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await fetchAllFakultas();
+      const result = await fetchAllData("fakultas");
       if (result.success) {
-        setAllFakultas(result.fakultasData);
+        setAllFakultas(result.data);
       } else {
-        console.error("Failed to fetch fakultas:", result.errorMsg);
+        alert(`Failed to fetch fakultas: ${result.errorMsg}`);
       }
     };
 
     fetchData();
-  }, [renderHelper]);
+  }, [tableRenderHelper]);
 
   const startContent = (
     <React.Fragment>
@@ -52,7 +52,7 @@ export default function page() {
         auto
         chooseLabel="Batch upload (JSON file)"
         onUpload={(e) => {
-          setRenderHelper(!renderHelper);
+          updateRender(tableRenderHelper, setTableRenderHelper);
         }}
       />
     </React.Fragment>
@@ -60,14 +60,15 @@ export default function page() {
 
   return (
     <div>
+      <Navbar />
       <p>Here's fakultas</p>
       <AddFakultasDialog
         visible={showAddDialog}
         onHide={() => {
           setShowAddDialog(false);
         }}
-        onSubmitSuccess={(newFakultas: Fakultas) => {
-          setRenderHelper(!renderHelper);
+        onSubmitSuccess={() => {
+          updateRender(tableRenderHelper, setTableRenderHelper);
         }}
       />
       <Toolbar start={startContent}></Toolbar>
@@ -78,39 +79,35 @@ export default function page() {
   );
 }
 
-async function fetchAllFakultas() {
-  try {
-    const response = await fetch("http://localhost:3000/fakultas");
-    const allFakultas = await response.json();
-    if (!response.ok) {
-      return { success: false, errorMsg: allFakultas.error };
-    }
-    console.log(allFakultas);
-    return { success: true, fakultasData: allFakultas };
-  } catch (error) {
-    return { success: false, errorMsg: (error as Error).message };
-  }
-}
-
 function AddFakultasDialog(props: {
   visible: boolean;
   onHide: () => void;
-  onSubmitSuccess: (newFakultas: Fakultas) => void;
+  onSubmitSuccess: () => void;
 }) {
   const [newFakultasName, setNewFakultasName] = useState("");
+
+  useEffect(() => {
+    setNewFakultasName("");
+  }, [props.visible]);
+
   return (
     <Dialog
       header="Tambahkan fakultas baru"
       visible={props.visible}
       style={{ width: "50vw" }}
       onHide={props.onHide}
+      blockScroll
     >
-      <InputText
-        value={newFakultasName}
-        onChange={(e) => {
-          setNewFakultasName(e.target.value);
-        }}
-      />
+      <span className="p-float-label" style={{ marginTop: "24px" }}>
+        <InputText
+          id="a"
+          value={newFakultasName}
+          onChange={(e) => {
+            setNewFakultasName(e.target.value);
+          }}
+        />
+        <label htmlFor="a">Nama Fakultas</label>
+      </span>
       <Button
         label="Save"
         icon="pi pi-check"
@@ -121,9 +118,9 @@ function AddFakultasDialog(props: {
               { namaFakultas: newFakultasName },
             ]);
             if (result.success) {
-              props.onSubmitSuccess({ namaFakultas: newFakultasName });
+              props.onSubmitSuccess();
             } else {
-              console.error("Failed to fetch fakultas:", result.errorMsg);
+              console.error("Failed to add fakultas:", result.errorMsg);
             }
           };
           postData();
