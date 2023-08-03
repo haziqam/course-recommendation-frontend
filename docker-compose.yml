@@ -1,7 +1,12 @@
 version: "3.8"
+
 services:
   app:
     image: task8-frontend
     build: .
     ports:
       - 3000:3000
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./public:/usr/src/app/public
+    command: npm run dev
