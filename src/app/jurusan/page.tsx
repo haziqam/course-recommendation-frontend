@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primeicons/primeicons.css";
@@ -12,13 +12,96 @@ import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
 import { Navbar } from "@/components/Navbar";
 import { updateRender } from "@/util/updateRender";
-import { Dropdown } from "primereact/dropdown";
 import { fetchAllData } from "@/util/fetchAllData";
+import { AddJurusanDialog } from "./AddJurusanDialog";
+import { showError, showSuccess } from "@/util/toastFunctions";
+import { Toast } from "primereact/toast";
 
-export default function page() {
+export default function Page() {
   const [allJurusan, setAllJurusan] = useState<Jurusan[]>();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [tableRenderHelper, setTableRenderHelper] = useState(false);
+  const [jurusanToDelete, setJurusanToDelete] = useState<Jurusan | null>(null);
+  const [showDeleteJurusanDialog, setShowDeleteJurusanDialog] = useState(false);
+  const toastRef = useRef<Toast>(null);
+
+  const hideDeleteJurusanDialog = () => {
+    setShowDeleteJurusanDialog(false);
+  };
+
+  const confirmDeleteJurusan = (jurusan: Jurusan) => {
+    setJurusanToDelete(jurusan);
+    setShowDeleteJurusanDialog(true);
+  };
+
+  const deleteJurusan = async () => {
+    const result = await removeJurusan(jurusanToDelete!);
+    if (!result.success) {
+      showError(toastRef, `Gagal menghapus jurusan: ${result.errorMsg}`);
+    } else {
+      showSuccess(toastRef, "Jurusan berhasil dihapus");
+    }
+    hideDeleteJurusanDialog();
+    setJurusanToDelete(null);
+    updateRender(tableRenderHelper, setTableRenderHelper);
+  };
+
+  const deleteJurusanDialogFooter = (
+    <React.Fragment>
+      <Button
+        label="No"
+        icon="pi pi-times"
+        outlined
+        onClick={hideDeleteJurusanDialog}
+      />
+      <Button
+        label="Yes"
+        icon="pi pi-check"
+        severity="danger"
+        onClick={deleteJurusan}
+      />
+    </React.Fragment>
+  );
+
+  const actionBodyTemplate = (rowData: Jurusan) => {
+    return (
+      <React.Fragment>
+        <Button
+          icon="pi pi-trash"
+          rounded
+          outlined
+          severity="danger"
+          onClick={() => confirmDeleteJurusan(rowData)}
+        />
+      </React.Fragment>
+    );
+  };
+
+  const DeleteJurusanDialog = () => {
+    return (
+      <Dialog
+        visible={showDeleteJurusanDialog}
+        style={{ width: "32rem" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Confirm"
+        modal
+        footer={deleteJurusanDialogFooter}
+        onHide={hideDeleteJurusanDialog}
+      >
+        <div className="confirmation-content">
+          <i
+            className="pi pi-exclamation-triangle mr-3"
+            style={{ fontSize: "2rem" }}
+          />
+          {jurusanToDelete && (
+            <span>
+              Anda yakin ingin menghapus <b>{jurusanToDelete.namaFakultas}</b>?
+            </span>
+          )}
+        </div>
+      </Dialog>
+    );
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,13 +129,22 @@ export default function page() {
       <FileUpload
         mode="basic"
         name="Jurusan[]"
-        url="http://localhost:3000/jurusan/addFromFile"
+        url="http://localhost:5000/jurusan/addFromFile"
         accept=".json"
         maxFileSize={1000000}
         auto
         chooseLabel="Batch upload (JSON file)"
         onUpload={(e) => {
+          showSuccess(toastRef, "Berhasil menambahkan jurusan");
           updateRender(tableRenderHelper, setTableRenderHelper);
+        }}
+        onError={(e) => {
+          const response = JSON.parse(e.xhr.response);
+          showError(
+            toastRef,
+            `Gagal menambahkan jurusan: ${response.error}. Pastikan atribut JSON valid dan lengkap,` +
+              " namaJurusan harus unik, serta namaFakultas tersedia pada tabel fakultas"
+          );
         }}
       />
     </React.Fragment>
@@ -61,6 +153,7 @@ export default function page() {
   return (
     <div>
       <Navbar />
+      <Toast ref={toastRef} position="bottom-right" />
       <p>Here's jurusan</p>
       <AddJurusanDialog
         visible={showAddDialog}
@@ -69,105 +162,38 @@ export default function page() {
         }}
         onSubmitSuccess={() => {
           updateRender(tableRenderHelper, setTableRenderHelper);
+          showSuccess(toastRef, "Berhasil menambahkan jurusan");
         }}
       />
       <Toolbar start={startContent}></Toolbar>
-      <DataTable value={allJurusan}>
+      <DeleteJurusanDialog />
+      <DataTable
+        value={allJurusan}
+        sortMode="multiple"
+        removableSort
+        showGridlines
+      >
         <Column field="namaFakultas" header="Nama Fakultas" sortable></Column>
-        <Column field="namaJurusan" header="Nama Jurusan"></Column>
+        <Column field="namaJurusan" header="Nama Jurusan" sortable></Column>
+        <Column body={actionBodyTemplate} exportable={false}></Column>
       </DataTable>
     </div>
   );
 }
 
-function AddJurusanDialog(props: {
-  visible: boolean;
-  onHide: () => void;
-  onSubmitSuccess: () => void;
-}) {
-  const [newJurusanName, setNewJurusanName] = useState("");
-  const [selectedFakultas, setSelectedFakultas] = useState<Fakultas | null>(
-    null
-  );
-  const [fakultasOptions, setFakultasOptions] = useState<Fakultas[]>([]);
-
-  useEffect(() => {
-    setNewJurusanName("");
-    setSelectedFakultas(null);
-    const fetchData = async () => {
-      const fakultasResponse = await fetchAllData("fakultas");
-      if (!fakultasResponse.success) {
-        alert(`Failed to fetch fakultas options: ${fakultasResponse.errorMsg}`);
-        return;
-      }
-      setFakultasOptions(fakultasResponse.data);
-    };
-    fetchData();
-  }, [props.visible]);
-
-  return (
-    <Dialog
-      header="Tambahkan jurusan baru"
-      visible={props.visible}
-      style={{ width: "50vw" }}
-      onHide={props.onHide}
-      blockScroll
-    >
-      <span className="p-float-label" style={{ marginTop: "24px" }}>
-        <Dropdown
-          inputId="selectedFakultas"
-          value={selectedFakultas}
-          onChange={(e) => setSelectedFakultas(e.value)}
-          options={fakultasOptions}
-          optionLabel="namaFakultas"
-        />
-        <label htmlFor="selectedFakultas">Nama Fakultas</label>
-      </span>
-      <span className="p-float-label" style={{ marginTop: "24px" }}>
-        <InputText
-          id="newJurusanName"
-          value={newJurusanName}
-          onChange={(e) => {
-            setNewJurusanName(e.target.value);
-          }}
-        />
-        <label htmlFor="newJurusanName">Nama Jurusan</label>
-      </span>
-      <Button
-        label="Save"
-        icon="pi pi-check"
-        disabled={newJurusanName === "" || selectedFakultas === null}
-        onClick={(e) => {
-          const postData = async () => {
-            const result = await addJurusan([
-              {
-                namaJurusan: newJurusanName,
-                namaFakultas: selectedFakultas!.namaFakultas,
-              },
-            ]);
-            if (!result.success) {
-              console.error("Failed to add jurusan:", result.errorMsg);
-              return;
-            }
-            props.onSubmitSuccess();
-          };
-          postData();
-          props.onHide();
-        }}
-      />
-    </Dialog>
-  );
-}
-
-async function addJurusan(jurusan: Jurusan[]) {
+async function removeJurusan(jurusan: Jurusan) {
+  const encodedNamaJurusan = encodeURIComponent(jurusan.namaJurusan);
   try {
-    const response = await fetch("http://localhost:3000/jurusan", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(jurusan),
-    });
+    const response = await fetch(
+      `http://localhost:5000/jurusan?jurusan=${encodedNamaJurusan}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
     if (!response.ok) {
       const errorMsg = await response.json();
       return { success: false, errorMsg: errorMsg.error as string };

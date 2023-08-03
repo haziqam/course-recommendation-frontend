@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primeicons/primeicons.css";
@@ -13,16 +13,19 @@ import { Dropdown, DropdownProps } from "primereact/dropdown";
 import { fetchAllData } from "@/util/fetchAllData";
 import { MatkulTable } from "./matkulTable";
 import { InputText } from "primereact/inputtext";
+import { Toast } from "primereact/toast";
+import { showError, showSuccess } from "@/util/toastFunctions";
 
-export default function page() {
-  const [allMatkul, setAllMatkul] = useState<Matkul[]>();
+export default function Page() {
+  const [allMatkul, setAllMatkul] = useState<Matkul[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [tableRenderHelper, setTableRenderHelper] = useState(false);
+  const toastRef = useRef<Toast>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       const result = await fetchAllData("matkul");
-      if (result.success) {
+      if (!result.success) {
         console.error("Failed to fetch matkul:", result.errorMsg);
         return;
       }
@@ -45,13 +48,23 @@ export default function page() {
       <FileUpload
         mode="basic"
         name="Matkul[]"
-        url="http://localhost:3000/matkul/addFromFile"
+        url="http://localhost:5000/matkul/addFromFile"
         accept=".json"
         maxFileSize={1000000}
         auto
         chooseLabel="Batch upload (JSON file)"
         onUpload={(e) => {
+          showSuccess(toastRef, "Berhasil menambahkan matkul");
           updateRender(tableRenderHelper, setTableRenderHelper);
+        }}
+        onError={(e) => {
+          const response = JSON.parse(e.xhr.response);
+          showError(
+            toastRef,
+            `Gagal menambahkan matkul: ${response.error}. Pastikan atribut JSON valid dan lengkap,` +
+              " namaMatkul harus unik terhadap namaJurusan, serta namaJurusan" +
+              " tersedia pada tabel jurusan"
+          );
         }}
       />
     </React.Fragment>
@@ -60,6 +73,7 @@ export default function page() {
   return (
     <div>
       <Navbar />
+      <Toast ref={toastRef} position="bottom-right" />
       <p>Here's matkul</p>
       <AddMatkulDialog
         visible={showAddDialog}
@@ -69,9 +83,16 @@ export default function page() {
         onSubmitSuccess={() => {
           updateRender(tableRenderHelper, setTableRenderHelper);
         }}
+        toastRef={toastRef}
       />
-      <Toolbar start={toolbarContent}></Toolbar>
-      <MatkulTable allMatkul={allMatkul} />
+      <Toolbar start={toolbarContent} />
+      <MatkulTable
+        allMatkul={allMatkul}
+        isDeletable={true}
+        onModify={() => {
+          updateRender(tableRenderHelper, setTableRenderHelper);
+        }}
+      />
     </div>
   );
 }
@@ -80,6 +101,7 @@ function AddMatkulDialog(props: {
   visible: boolean;
   onHide: () => void;
   onSubmitSuccess: () => void;
+  toastRef: React.RefObject<Toast>;
 }) {
   const [newMatkulName, setNewMatkulName] = useState("");
   const [newMatkulSKS, setNewMatkulSKS] = useState("");
@@ -88,9 +110,16 @@ function AddMatkulDialog(props: {
   const [selectedJurusan, setSelectedJurusan] = useState<Jurusan | null>(null);
   const [jurusanOptions, setJurusanOptions] = useState<Jurusan[]>([]);
 
-  useEffect(() => {
+  const resetFormData = () => {
     setNewMatkulName("");
+    setNewMatkulSKS("");
+    setNewMatkulMinSemester("");
+    setNewMatkulPrediksiIndeks("");
     setSelectedJurusan(null);
+  };
+
+  useEffect(() => {
+    resetFormData();
     const fetchData = async () => {
       const jurusanResponse = await fetchAllData("jurusan");
       if (!jurusanResponse.success) {
@@ -114,6 +143,16 @@ function AddMatkulDialog(props: {
       <div className="flex align-items-center">
         <div>{option.namaJurusan}</div>
       </div>
+    );
+  };
+
+  const dataNotFilled = () => {
+    return (
+      newMatkulName === "" ||
+      selectedJurusan === null ||
+      newMatkulSKS === "" ||
+      newMatkulMinSemester === "" ||
+      newMatkulPrediksiIndeks === ""
     );
   };
 
@@ -186,13 +225,7 @@ function AddMatkulDialog(props: {
       <Button
         label="Save"
         icon="pi pi-check"
-        disabled={
-          newMatkulName === "" ||
-          selectedJurusan === null ||
-          newMatkulSKS === "" ||
-          newMatkulMinSemester === "" ||
-          newMatkulPrediksiIndeks === ""
-        }
+        disabled={dataNotFilled()}
         onClick={(e) => {
           const postData = async () => {
             const result = await addMatkul([
@@ -204,10 +237,16 @@ function AddMatkulDialog(props: {
                 prediksiIndeks: newMatkulPrediksiIndeks,
               },
             ]);
-            if (result.success) {
-              console.error("Failed to fetch jurusan:", result.errorMsg);
+            if (!result.success) {
+              showError(
+                props.toastRef,
+                `Gagal menambahkan matkul: ${result.errorMsg}. Pastikan data valid, ` +
+                  "nama matkul unik terhadap nama jurusan, serta nama jurusan teredia " +
+                  "pada tabel jurusan"
+              );
               return;
             }
+            showSuccess(props.toastRef, "Berhasil menambahkan matkul");
             props.onSubmitSuccess();
           };
           postData();
@@ -220,7 +259,7 @@ function AddMatkulDialog(props: {
 
 async function addMatkul(matkul: Matkul[]) {
   try {
-    const response = await fetch("http://localhost:3000/matkul", {
+    const response = await fetch("http://localhost:5000/matkul", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

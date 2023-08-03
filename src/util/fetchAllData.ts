@@ -2,7 +2,7 @@ export async function fetchAllData(
   entityName: "fakultas" | "jurusan" | "matkul"
 ) {
   try {
-    const response = await fetch("http://localhost:3000/" + entityName);
+    const response = await fetch("http://localhost:5000/" + entityName);
     const allData = await response.json();
     if (!response.ok) {
       return { success: false, errorMsg: allData.error };

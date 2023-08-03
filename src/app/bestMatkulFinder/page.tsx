@@ -84,7 +84,7 @@ export default function Page() {
           }}
         />
       </Panel>
-      <MatkulTable allMatkul={availableMatkul} />
+      <MatkulTable allMatkul={availableMatkul} isDeletable={false} />
       <Panel header="Informasi SKS">
         <label htmlFor="minSKS" style={{ display: "block" }}>
           SKS minimum yang dapat diambil
@@ -134,7 +134,7 @@ export default function Page() {
           }}
         />
       </Panel>
-      <MatkulTable allMatkul={bestMatkul} />
+      <MatkulTable allMatkul={bestMatkul} isDeletable={false} />
       <Panel header="Prediksi">
         <div>{bestMatkulIP}</div>
         <div>{bestMatkulSKS}</div>
@@ -147,7 +147,7 @@ async function findAvailableMatkul(namaFakultas: string, semester: number) {
   try {
     const encodedNamaFakultas = encodeURIComponent(namaFakultas);
     const response = await fetch(
-      `http://localhost:3000/matkul/find?fakultas=${encodedNamaFakultas}&semester=${semester}`
+      `http://localhost:5000/matkul/find?fakultas=${encodedNamaFakultas}&semester=${semester}`
     );
 
     if (!response.ok) {
@@ -171,7 +171,7 @@ async function findBestMatkul(
   try {
     const encodedNamaFakultas = encodeURIComponent(namaFakultas);
     const response = await fetch(
-      `http://localhost:3000/matkul/find/bestOptions?fakultas=${encodedNamaFakultas}&semester=${semester}&minSKS=${minSKS}&maxSKS=${maxSKS}`
+      `http://localhost:5000/matkul/find/bestOptions?fakultas=${encodedNamaFakultas}&semester=${semester}&minSKS=${minSKS}&maxSKS=${maxSKS}`
     );
 
     if (!response.ok) {
