@@ -5,11 +5,14 @@ import "primeicons/primeicons.css";
 import { fetchAllData } from "@/util/fetchAllData";
 import { Dropdown } from "primereact/dropdown";
 import { Panel } from "primereact/panel";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { MatkulTable } from "../matkul/matkulTable";
+import { MatkulTable } from "../matkul/MatkulTable";
 import { Navbar } from "@/components/Navbar";
+import { Toast } from "primereact/toast";
+import { showError, showSuccess } from "@/util/toastFunctions";
+import sharedStyles from "../shared.module.css";
 
 export default function Page() {
   const [fakultasOptions, setFakultasOptions] = useState<Fakultas[]>([]);
@@ -23,6 +26,7 @@ export default function Page() {
   const [bestMatkul, setBestMatkul] = useState<Matkul[]>([]);
   const [bestMatkulIP, setBestMatkulIP] = useState(0);
   const [bestMatkulSKS, setBestMatkulSKS] = useState(0);
+  const toastRef = useRef<Toast>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,80 +44,116 @@ export default function Page() {
   const SKSnotFilled = () => minSKS === "" || maxSKS === "";
   const isSKSvalid = () => minSKS <= maxSKS;
 
+  const labelStyle = { display: "block", marginBottom: "8px" };
+  const panelStyle = {
+    marginBottom: "32px",
+    marginLeft: "32px",
+    width: "500px",
+  };
+
   return (
     <div>
       <Navbar />
-      <Panel header="Cari matkul">
-        <label htmlFor="namaFakultas" style={{ display: "block" }}>
-          Fakultas
-        </label>
-        <Dropdown
-          inputId="namaFakultas"
-          value={selectedFakultas}
-          options={fakultasOptions}
-          optionLabel="namaFakultas"
-          onChange={(e) => {
-            setSelectedFakultas(e.value);
-          }}
-        />
-        <label htmlFor="semester" style={{ display: "block" }}>
-          Semester saat ini
-        </label>
-        <InputText
-          id="semester"
-          value={semester}
-          keyfilter="pint"
-          onChange={(e) => {
-            setSemester(e.target.value);
-          }}
-        />
+      <Toast ref={toastRef} position="bottom-right" />
+      <div style={{ marginTop: "54px", paddingBottom: "32px" }}></div>
+      <Panel header="Cari matkul" style={panelStyle}>
+        <div>
+          <label htmlFor="namaFakultas" style={labelStyle}>
+            Fakultas
+          </label>
+          <Dropdown
+            inputId="namaFakultas"
+            pt={{ root: { style: { width: "211px" } } }}
+            value={selectedFakultas}
+            options={fakultasOptions}
+            optionLabel="namaFakultas"
+            onChange={(e) => {
+              setSelectedFakultas(e.value);
+            }}
+          />
+        </div>
+        <div style={{ marginTop: "24px", marginBottom: "24px" }}>
+          <label htmlFor="semester" style={labelStyle}>
+            Semester saat ini
+          </label>
+          <InputText
+            id="semester"
+            value={semester}
+            keyfilter="pint"
+            onChange={(e) => {
+              setSemester(e.target.value);
+            }}
+          />
+        </div>
         <Button
           label="Lihat matkul yang tersedia"
-          disabled={dataNotFilled()}
+          style={{ display: "block" }}
+          disabled={dataNotFilled() || semester === "0"}
           onClick={async (e) => {
-            if (dataNotFilled()) return;
+            setAvailableMatkul([]);
+            if (dataNotFilled() || semester === "0") return;
             const result = await findAvailableMatkul(
               selectedFakultas!.namaFakultas,
               parseInt(semester)
             );
             if (!result.success) {
-              // Toast gagal
+              showError(toastRef, result.errorMsg!);
+              return;
+            }
+            if (result.availableMatkul === null) {
+              showError(
+                toastRef,
+                `Tidak menemukan matkul fakultas ${selectedFakultas?.namaFakultas} dengan semester minimum <= ${semester}`
+              );
               return;
             }
             setAvailableMatkul(result.availableMatkul!);
+            showSuccess(toastRef, "Matkul berhasil ditemukan");
           }}
         />
       </Panel>
-      <MatkulTable allMatkul={availableMatkul} isDeletable={false} />
-      <Panel header="Informasi SKS">
-        <label htmlFor="minSKS" style={{ display: "block" }}>
-          SKS minimum yang dapat diambil
-        </label>
-        <InputText
-          id="minSKS"
-          value={minSKS}
-          keyfilter="pint"
-          onChange={(e) => {
-            setMinSKS(e.target.value);
-          }}
-        />
-        <label htmlFor="maxSKS" style={{ display: "block" }}>
-          SKS maksimum yang dapat diambil
-        </label>
-        <InputText
-          id="maxSKS"
-          value={maxSKS}
-          keyfilter="pint"
-          onChange={(e) => {
-            setMaxSKS(e.target.value);
-          }}
-        />
+      <div className={sharedStyles.tableStyle}>
+        <MatkulTable allMatkul={availableMatkul} isDeletable={false} />
+      </div>
+      <Panel header="Informasi SKS" style={panelStyle}>
+        <div>
+          <label htmlFor="minSKS" style={labelStyle}>
+            SKS minimum yang dapat diambil
+          </label>
+          <InputText
+            pt={{ root: { style: { width: "100px" } } }}
+            id="minSKS"
+            value={minSKS}
+            keyfilter="pint"
+            onChange={(e) => {
+              setMinSKS(e.target.value);
+            }}
+          />
+        </div>
+        <div style={{ marginTop: "24px", marginBottom: "24px" }}>
+          <label htmlFor="maxSKS" style={labelStyle}>
+            SKS maksimum yang dapat diambil
+          </label>
+          <InputText
+            pt={{ root: { style: { width: "100px" } } }}
+            id="maxSKS"
+            value={maxSKS}
+            keyfilter="pint"
+            onChange={(e) => {
+              setMaxSKS(e.target.value);
+            }}
+          />
+        </div>
         <Button
           label="Cari pilihan matkul terbaik"
-          disabled={dataNotFilled() || SKSnotFilled()}
+          disabled={dataNotFilled() || semester === "0" || SKSnotFilled()}
+          style={{ display: "block" }}
           onClick={async (e) => {
+            setBestMatkul([]);
+            setBestMatkulIP(0);
+            setBestMatkulSKS(0);
             if (!isSKSvalid) {
-              //toast invalid
+              showError(toastRef, "Masukan SKS tidak valid");
               return;
             }
             const result = await findBestMatkul(
@@ -124,20 +164,28 @@ export default function Page() {
             );
 
             if (!result.success) {
-              // toast gagal
+              showError(toastRef, result.errorMsg!);
               return;
             }
             setBestMatkul(result.bestMatkul!);
             setBestMatkulIP(result.bestMatkulIP!);
             setBestMatkulSKS(result.bestMatkulSKS!);
-            // updateRender(bestRenderHelper, setBestRenderHelper);
+            showSuccess(toastRef, "Berhasil menemukan pilihan matkul terbaik");
           }}
         />
       </Panel>
-      <MatkulTable allMatkul={bestMatkul} isDeletable={false} />
-      <Panel header="Prediksi">
-        <div>{bestMatkulIP}</div>
-        <div>{bestMatkulSKS}</div>
+      <div className={sharedStyles.tableStyle}>
+        <MatkulTable allMatkul={bestMatkul} isDeletable={false} />
+      </div>
+      <Panel header="Prediksi" style={panelStyle}>
+        <div style={{ padding: "8px 0" }}>
+          <b>IP : </b>
+          <span>{bestMatkulIP === 0 ? "-" : bestMatkulIP}</span>
+        </div>
+        <div style={{ padding: "8px 0" }}>
+          <b>SKS : </b>
+          <span>{bestMatkulSKS === 0 ? "-" : bestMatkulSKS}</span>
+        </div>
       </Panel>
     </div>
   );

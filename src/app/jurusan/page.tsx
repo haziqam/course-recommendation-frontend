@@ -8,7 +8,6 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
 import { Navbar } from "@/components/Navbar";
 import { updateRender } from "@/util/updateRender";
@@ -16,6 +15,7 @@ import { fetchAllData } from "@/util/fetchAllData";
 import { AddJurusanDialog } from "./AddJurusanDialog";
 import { showError, showSuccess } from "@/util/toastFunctions";
 import { Toast } from "primereact/toast";
+import sharedStyles from "../shared.module.css";
 
 export default function Page() {
   const [allJurusan, setAllJurusan] = useState<Jurusan[]>();
@@ -94,8 +94,14 @@ export default function Page() {
             style={{ fontSize: "2rem" }}
           />
           {jurusanToDelete && (
-            <span>
-              Anda yakin ingin menghapus <b>{jurusanToDelete.namaFakultas}</b>?
+            <span
+              style={{
+                marginLeft: "16px",
+                position: "relative",
+                bottom: "8px",
+              }}
+            >
+              Anda yakin ingin menghapus <b>{jurusanToDelete.namaJurusan}</b>?
             </span>
           )}
         </div>
@@ -122,6 +128,7 @@ export default function Page() {
         label="New"
         icon="pi pi-plus"
         className="mr-2"
+        pt={{ root: { style: { marginRight: "16px" } } }}
         onClick={(e) => {
           setShowAddDialog(true);
         }}
@@ -153,8 +160,8 @@ export default function Page() {
   return (
     <div>
       <Navbar />
+      <div style={{ marginTop: "54px", paddingBottom: "32px" }}></div>
       <Toast ref={toastRef} position="bottom-right" />
-      <p>Here's jurusan</p>
       <AddJurusanDialog
         visible={showAddDialog}
         onHide={() => {
@@ -165,18 +172,22 @@ export default function Page() {
           showSuccess(toastRef, "Berhasil menambahkan jurusan");
         }}
       />
-      <Toolbar start={startContent}></Toolbar>
-      <DeleteJurusanDialog />
-      <DataTable
-        value={allJurusan}
-        sortMode="multiple"
-        removableSort
-        showGridlines
-      >
-        <Column field="namaFakultas" header="Nama Fakultas" sortable></Column>
-        <Column field="namaJurusan" header="Nama Jurusan" sortable></Column>
-        <Column body={actionBodyTemplate} exportable={false}></Column>
-      </DataTable>
+      <div className={sharedStyles.mediumTableStyle}>
+        <div style={{ paddingBottom: "32px" }}>
+          <Toolbar start={startContent}></Toolbar>
+        </div>
+        <DeleteJurusanDialog />
+        <DataTable
+          value={allJurusan}
+          sortMode="multiple"
+          removableSort
+          showGridlines
+        >
+          <Column field="namaFakultas" header="Nama Fakultas" sortable></Column>
+          <Column field="namaJurusan" header="Nama Jurusan" sortable></Column>
+          <Column body={actionBodyTemplate} exportable={false}></Column>
+        </DataTable>
+      </div>
     </div>
   );
 }

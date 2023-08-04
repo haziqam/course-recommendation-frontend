@@ -20,8 +20,9 @@ export function AddFakultasDialog(props: {
   return (
     <Dialog
       header="Tambahkan fakultas baru"
+      pt={{ header: { style: { paddingBottom: "0" } } }}
       visible={props.visible}
-      style={{ width: "50vw" }}
+      style={{ width: "35vw" }}
       onHide={props.onHide}
       blockScroll
     >
@@ -37,6 +38,7 @@ export function AddFakultasDialog(props: {
       </span>
       <Button
         label="Save"
+        pt={{ root: { style: { marginTop: "24px" } } }}
         icon="pi pi-check"
         disabled={newFakultasName === ""}
         onClick={(e) => {

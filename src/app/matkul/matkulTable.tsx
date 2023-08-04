@@ -84,7 +84,13 @@ export function MatkulTable(props: {
             style={{ fontSize: "2rem" }}
           />
           {matkulToDelete && (
-            <span>
+            <span
+              style={{
+                marginLeft: "16px",
+                position: "relative",
+                bottom: "8px",
+              }}
+            >
               Anda yakin ingin menghapus matkul{" "}
               <b>{matkulToDelete.namaMatkul}</b>?
             </span>

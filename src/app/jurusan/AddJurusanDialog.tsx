@@ -33,14 +33,16 @@ export function AddJurusanDialog(props: {
   return (
     <Dialog
       header="Tambahkan jurusan baru"
+      pt={{ header: { style: { paddingBottom: "0" } } }}
       visible={props.visible}
-      style={{ width: "50vw" }}
+      style={{ width: "35vw" }}
       onHide={props.onHide}
       blockScroll
     >
       <span className="p-float-label" style={{ marginTop: "24px" }}>
         <Dropdown
           inputId="selectedFakultas"
+          pt={{ root: { style: { width: "211px" } } }}
           value={selectedFakultas}
           onChange={(e) => setSelectedFakultas(e.value)}
           options={fakultasOptions}
@@ -60,6 +62,7 @@ export function AddJurusanDialog(props: {
       </span>
       <Button
         label="Save"
+        pt={{ root: { style: { marginTop: "24px" } } }}
         icon="pi pi-check"
         disabled={newJurusanName === "" || selectedFakultas === null}
         onClick={(e) => {

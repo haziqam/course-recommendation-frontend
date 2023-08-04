@@ -15,6 +15,7 @@ import { fetchAllData } from "@/util/fetchAllData";
 import { Toast } from "primereact/toast";
 import { showError, showSuccess } from "@/util/toastFunctions";
 import { AddFakultasDialog } from "./AddFakultasDialog";
+import sharedStyles from "../shared.module.css";
 
 export default function Page() {
   const [allFakultas, setAllFakultas] = useState<Fakultas[]>();
@@ -79,7 +80,7 @@ export default function Page() {
     );
   };
 
-  const DeleteMatkulDialog = () => {
+  const DeleteFakultasDialog = () => {
     return (
       <Dialog
         visible={showDeleteFakultasDialog}
@@ -96,7 +97,13 @@ export default function Page() {
             style={{ fontSize: "2rem" }}
           />
           {fakultasToDelete && (
-            <span>
+            <span
+              style={{
+                marginLeft: "16px",
+                position: "relative",
+                bottom: "8px",
+              }}
+            >
               Anda yakin ingin menghapus <b>{fakultasToDelete.namaFakultas}</b>?
             </span>
           )}
@@ -122,6 +129,7 @@ export default function Page() {
     <React.Fragment>
       <Button
         label="New"
+        pt={{ root: { style: { marginRight: "16px" } } }}
         icon="pi pi-plus"
         className="mr-2"
         onClick={(e) => {
@@ -155,8 +163,8 @@ export default function Page() {
   return (
     <div>
       <Navbar />
+      <div style={{ marginTop: "54px", paddingBottom: "32px" }}></div>
       <Toast ref={toastRef} position="bottom-right" />
-      <p>Here's fakultas</p>
       <AddFakultasDialog
         visible={showAddDialog}
         onHide={() => {
@@ -167,12 +175,16 @@ export default function Page() {
         }}
         toastRef={toastRef}
       />
-      <Toolbar start={startContent} />
-      <DeleteMatkulDialog />
-      <DataTable value={allFakultas} removableSort showGridlines>
-        <Column field="namaFakultas" header="Nama Fakultas" sortable></Column>
-        <Column body={actionBodyTemplate} exportable={false}></Column>
-      </DataTable>
+      <div className={sharedStyles.smallTableStyle}>
+        <div style={{ paddingBottom: "32px" }}>
+          <Toolbar start={startContent} />
+        </div>
+        <DeleteFakultasDialog />
+        <DataTable value={allFakultas} removableSort showGridlines>
+          <Column field="namaFakultas" header="Nama Fakultas" sortable></Column>
+          <Column body={actionBodyTemplate} exportable={false}></Column>
+        </DataTable>
+      </div>
     </div>
   );
 }
