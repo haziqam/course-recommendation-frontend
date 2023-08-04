@@ -32,7 +32,7 @@ Dengan ketiga data tersebut, pengguna dapat menemukan pilihan mata kuliah yang d
   ```
 - Buka aplikasi docker desktop, kemudian jalankan command berikut di terminal
   ```
-  docker compose up - d
+  docker compose up -d
   ```
 - Secara default, program akan dihost pada http://localhost:3000. Buka link berikut untuk menggunakan aplikasi, atau cek URL yang ditampilkan pada terminal setelah menjalankan command sebelumnya.
 
