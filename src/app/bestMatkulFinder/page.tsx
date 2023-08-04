@@ -24,7 +24,7 @@ export default function Page() {
   const [maxSKS, setMaxSKS] = useState("");
   const [availableMatkul, setAvailableMatkul] = useState<Matkul[]>([]);
   const [bestMatkul, setBestMatkul] = useState<Matkul[]>([]);
-  const [bestMatkulIP, setBestMatkulIP] = useState(0);
+  const [bestMatkulIP, setBestMatkulIP] = useState(-1);
   const [bestMatkulSKS, setBestMatkulSKS] = useState(0);
   const toastRef = useRef<Toast>(null);
 
@@ -150,7 +150,7 @@ export default function Page() {
           style={{ display: "block" }}
           onClick={async (e) => {
             setBestMatkul([]);
-            setBestMatkulIP(0);
+            setBestMatkulIP(-1);
             setBestMatkulSKS(0);
             if (!isSKSvalid) {
               showError(toastRef, "Masukan SKS tidak valid");
@@ -180,7 +180,7 @@ export default function Page() {
       <Panel header="Prediksi" style={panelStyle}>
         <div style={{ padding: "8px 0" }}>
           <b>IP : </b>
-          <span>{bestMatkulIP === 0 ? "-" : bestMatkulIP}</span>
+          <span>{bestMatkulIP === -1 ? "-" : bestMatkulIP}</span>
         </div>
         <div style={{ padding: "8px 0" }}>
           <b>SKS : </b>

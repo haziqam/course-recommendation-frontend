@@ -53,6 +53,9 @@ Dengan ketiga data tersebut, pengguna dapat menemukan pilihan mata kuliah yang d
   - Berikut adalah tampilan matkul terbaik, IP serta SKS yang diambil
     <img src='./images/21.png'>
     <img src='./images/22.png'>
+  - Contoh testcase lain:
+    <img src='./images/23.png'>
+    <img src='./images/24.png'>
 - Berikut adalah cara untuk memodifikasi data
 
   - Data fakultas
