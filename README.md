@@ -7,7 +7,7 @@ Program ini merupakan aplikasi berbasis web yang digunakan untuk menemukan pilih
 - Jurusan, yang memiliki atribut:
   - Nama jurusan
   - Nama fakultas dari jurusan tersebut
-- Matkul
+- Matkul, yang memiliki atribut:
   - Nama matkul
   - Nama jurusan dari matkul tersebut
   - Minimum semester pengambilan
