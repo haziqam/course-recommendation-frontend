@@ -1,4 +1,4 @@
 interface Jurusan {
-  namaJurusan: string;
-  namaFakultas: string;
+    namaJurusan: string
+    namaFakultas: string
 }

@@ -1,13 +1,13 @@
 .tableStyle {
-  margin: 0 32px 32px 32px;
+    margin: 0 32px 32px 32px;
 }
 
 .mediumTableStyle {
-  margin: 0 auto 32px auto;
-  width: 70%;
+    margin: 0 auto 32px auto;
+    width: 70%;
 }
 
 .smallTableStyle {
-  margin: 0 auto 32px auto;
-  width: 50%;
+    margin: 0 auto 32px auto;
+    width: 50%;
 }

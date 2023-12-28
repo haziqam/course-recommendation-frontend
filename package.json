@@ -1,23 +1,27 @@
 {
-  "name": "course-scheduler-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@types/node": "20.4.4",
-    "@types/react": "18.2.16",
-    "@types/react-dom": "18.2.7",
-    "next": "13.4.12",
-    "primeicons": "^6.0.1",
-    "primereact": "^9.6.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-query": "^3.39.3",
-    "typescript": "5.1.6"
-  }
+    "name": "course-scheduler-frontend",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "format": "npx prettier --write ."
+    },
+    "dependencies": {
+        "@types/node": "20.4.4",
+        "@types/react": "18.2.16",
+        "@types/react-dom": "18.2.7",
+        "next": "^13.5.6",
+        "primeicons": "^6.0.1",
+        "primereact": "^9.6.0",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "react-query": "^3.39.3",
+        "typescript": "5.1.6"
+    },
+    "devDependencies": {
+        "prettier": "3.1.1"
+    }
 }

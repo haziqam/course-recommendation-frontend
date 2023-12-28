@@ -1,21 +1,21 @@
 .navbar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: rgb(42, 42, 42);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgb(42, 42, 42);
 }
 
 .navbar > ul {
-  list-style: none;
+    list-style: none;
 }
 
 .navbarLinks {
-  color: rgb(220, 220, 220);
-  text-decoration: none;
-  padding: 8px;
+    color: rgb(220, 220, 220);
+    text-decoration: none;
+    padding: 8px;
 }
 
 .navbarLinks:hover {
-  background-color: rgb(67, 67, 67);
+    background-color: rgb(67, 67, 67);
 }

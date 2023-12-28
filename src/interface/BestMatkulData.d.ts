@@ -1,5 +1,5 @@
 interface BestMatkulData {
-  IP: number;
-  SKS: number;
-  bestOptions: Matkul[];
+    IP: number
+    SKS: number
+    bestOptions: Matkul[]
 }
