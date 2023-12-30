@@ -4,9 +4,10 @@ import { DataTable } from 'primereact/datatable';
 
 export function MatkulTable(props: {
     allMatkul: Matkul[];
-    onDeleteMatkul: (matkul: Matkul) => void;
+    onDeleteMatkul?: (matkul: Matkul) => void;
+    isDeletable?: boolean;
 }) {
-    const { allMatkul, onDeleteMatkul } = props;
+    const { allMatkul, onDeleteMatkul, isDeletable } = props;
     const actionBodyTemplate = (rowData: Matkul) => {
         return (
             <>
@@ -16,7 +17,7 @@ export function MatkulTable(props: {
                     outlined
                     severity="danger"
                     onClick={() => {
-                        onDeleteMatkul(rowData);
+                        onDeleteMatkul!(rowData);
                     }}
                 />
             </>
@@ -39,11 +40,13 @@ export function MatkulTable(props: {
             ></Column>
             <Column field="sks" header="SKS" sortable></Column>
             <Column field="prediksiIndeks" header="Prediksi Indeks"></Column>
-            <Column
-                header="Actions"
-                body={actionBodyTemplate}
-                exportable={false}
-            ></Column>
+            {isDeletable === true ? (
+                <Column
+                    header="Actions"
+                    body={actionBodyTemplate}
+                    exportable={false}
+                ></Column>
+            ) : null}
         </DataTable>
     );
 }

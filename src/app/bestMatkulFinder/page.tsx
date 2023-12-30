@@ -1,20 +1,21 @@
 'use client';
-import { fetchAllData } from '@/util/fetchAllData';
 import { Dropdown } from 'primereact/dropdown';
 import { Panel } from 'primereact/panel';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-import { showError, showSuccess } from '@/util/toastFunctions';
-import sharedStyles from '../shared.module.css';
 import { MatkulTable } from '../matkul/MatkulTable';
+import { useToast } from '@/hooks/useToast';
+import { AxiosError } from 'axios';
+import { useGetAllFakultas } from '@/hooks/useGetAllFakultas';
+import { MatkulService } from '@/services/matkul.service';
+import sharedStyles from '../shared.module.css';
 import 'primereact/resources/primereact.min.css';
 import 'primereact/resources/themes/lara-light-blue/theme.css';
 import 'primeicons/primeicons.css';
 
 export default function Page() {
-    const [fakultasOptions, setFakultasOptions] = useState<Fakultas[]>([]);
     const [selectedFakultas, setSelectedFakultas] = useState<Fakultas | null>(
         null
     );
@@ -25,31 +26,87 @@ export default function Page() {
     const [bestMatkul, setBestMatkul] = useState<Matkul[]>([]);
     const [bestMatkulIP, setBestMatkulIP] = useState(-1);
     const [bestMatkulSKS, setBestMatkulSKS] = useState(0);
-    const toastRef = useRef<Toast>(null);
+    const { toastRef, showSuccess, showError } = useToast();
+    const {
+        data: fakultasOptions,
+        isLoading: isFakultasFetchLoading,
+        isError: isFakultasFetchError,
+    } = useGetAllFakultas();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const fakultasResponse = await fetchAllData('fakultas');
-            if (!fakultasResponse.success) {
-                alert(
-                    `Failed to fetch fakultas options: ${fakultasResponse.errorMsg}`
-                );
-                return;
-            }
-            setFakultasOptions(fakultasResponse.data);
-        };
-        fetchData();
-    }, []);
-
-    const dataNotFilled = () => selectedFakultas === null || semester === '';
-    const SKSnotFilled = () => minSKS === '' || maxSKS === '';
-    const isSKSvalid = () => minSKS <= maxSKS;
+    const dataNotFilled = selectedFakultas === null || semester === '';
+    const SKSnotFilled = minSKS === '' || maxSKS === '';
+    const isSKSvalid = minSKS <= maxSKS;
 
     const labelStyle = { display: 'block', marginBottom: '8px' };
     const panelStyle = {
         marginBottom: '32px',
         marginLeft: '32px',
         width: '500px',
+    };
+
+    const handeFindMatkulClick = async () => {
+        setAvailableMatkul([]);
+        if (dataNotFilled || semester === '0') return;
+
+        try {
+            const availableMatkul = await MatkulService.findAvailable(
+                selectedFakultas!.namaFakultas,
+                parseInt(semester)
+            );
+            if (availableMatkul === null) {
+                showError(
+                    `Tidak menemukan matkul fakultas ${selectedFakultas?.namaFakultas} dengan semester minimum <= ${semester}`
+                );
+                return;
+            }
+            setAvailableMatkul(availableMatkul);
+            showSuccess('Matkul berhasil ditemukan');
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const errorMsg = error.response?.data.error;
+                showError(
+                    `Terjadi kesalahan dalam menemukan matkul: ${errorMsg}`
+                );
+            }
+        }
+    };
+
+    const handleFindBestMatkulClick = async () => {
+        setBestMatkul([]);
+        setBestMatkulIP(-1);
+        setBestMatkulSKS(0);
+        if (!isSKSvalid) {
+            showError('Masukan SKS tidak valid');
+            return;
+        }
+
+        try {
+            const bestMatkul = await MatkulService.findBestOption(
+                selectedFakultas!.namaFakultas,
+                parseInt(semester),
+                parseInt(minSKS),
+                parseInt(maxSKS)
+            );
+
+            if (bestMatkul.bestOptions === null) {
+                showError(
+                    'Tidak terdapat pilihan matkul terbaik dengan kondisi yang diberikan'
+                );
+                return;
+            }
+
+            setBestMatkul(bestMatkul.bestOptions);
+            setBestMatkulIP(bestMatkul.IP);
+            setBestMatkulSKS(bestMatkul.SKS);
+            showSuccess('Berhasil menemukan pilihan matkul terbaik');
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const errorMsg = error.response?.data.error;
+                showError(
+                    `Terjadi kesalahan dalam menemukan matkul terbaik: ${errorMsg}`
+                );
+            }
+        }
     };
 
     return (
@@ -87,28 +144,8 @@ export default function Page() {
                 <Button
                     label="Lihat matkul yang tersedia"
                     style={{ display: 'block' }}
-                    disabled={dataNotFilled() || semester === '0'}
-                    onClick={async (e) => {
-                        setAvailableMatkul([]);
-                        if (dataNotFilled() || semester === '0') return;
-                        const result = await findAvailableMatkul(
-                            selectedFakultas!.namaFakultas,
-                            parseInt(semester)
-                        );
-                        if (!result.success) {
-                            showError(toastRef, result.errorMsg!);
-                            return;
-                        }
-                        if (result.availableMatkul === null) {
-                            showError(
-                                toastRef,
-                                `Tidak menemukan matkul fakultas ${selectedFakultas?.namaFakultas} dengan semester minimum <= ${semester}`
-                            );
-                            return;
-                        }
-                        setAvailableMatkul(result.availableMatkul!);
-                        showSuccess(toastRef, 'Matkul berhasil ditemukan');
-                    }}
+                    disabled={dataNotFilled || semester === '0'}
+                    onClick={handeFindMatkulClick}
                 />
             </Panel>
             <div className={sharedStyles.tableStyle}>
@@ -145,37 +182,9 @@ export default function Page() {
                 </div>
                 <Button
                     label="Cari pilihan matkul terbaik"
-                    disabled={
-                        dataNotFilled() || semester === '0' || SKSnotFilled()
-                    }
+                    disabled={dataNotFilled || semester === '0' || SKSnotFilled}
                     style={{ display: 'block' }}
-                    onClick={async (e) => {
-                        setBestMatkul([]);
-                        setBestMatkulIP(-1);
-                        setBestMatkulSKS(0);
-                        if (!isSKSvalid) {
-                            showError(toastRef, 'Masukan SKS tidak valid');
-                            return;
-                        }
-                        const result = await findBestMatkul(
-                            selectedFakultas!.namaFakultas,
-                            parseInt(semester),
-                            parseInt(minSKS),
-                            parseInt(maxSKS)
-                        );
-
-                        if (!result.success) {
-                            showError(toastRef, result.errorMsg!);
-                            return;
-                        }
-                        setBestMatkul(result.bestMatkul!);
-                        setBestMatkulIP(result.bestMatkulIP!);
-                        setBestMatkulSKS(result.bestMatkulSKS!);
-                        showSuccess(
-                            toastRef,
-                            'Berhasil menemukan pilihan matkul terbaik'
-                        );
-                    }}
+                    onClick={handleFindBestMatkulClick}
                 />
             </Panel>
             <div className={sharedStyles.tableStyle}>
@@ -193,52 +202,4 @@ export default function Page() {
             </Panel>
         </div>
     );
-}
-
-async function findAvailableMatkul(namaFakultas: string, semester: number) {
-    try {
-        const encodedNamaFakultas = encodeURIComponent(namaFakultas);
-        const response = await fetch(
-            `http://localhost:5000/matkul/find?fakultas=${encodedNamaFakultas}&semester=${semester}`
-        );
-
-        if (!response.ok) {
-            const errorMsg = await response.json();
-            return { success: false, errorMsg: errorMsg.error as string };
-        }
-
-        const availableMatkul = await response.json();
-        return { success: true, availableMatkul: availableMatkul as Matkul[] };
-    } catch (error) {
-        return { success: false, errorMsg: (error as Error).message };
-    }
-}
-
-async function findBestMatkul(
-    namaFakultas: string,
-    semester: number,
-    minSKS: number,
-    maxSKS: number
-) {
-    try {
-        const encodedNamaFakultas = encodeURIComponent(namaFakultas);
-        const response = await fetch(
-            `http://localhost:5000/matkul/find/bestOptions?fakultas=${encodedNamaFakultas}&semester=${semester}&minSKS=${minSKS}&maxSKS=${maxSKS}`
-        );
-
-        if (!response.ok) {
-            const errorMsg = await response.json();
-            return { success: false, errorMsg: errorMsg.error as string };
-        }
-
-        const result = (await response.json()) as BestMatkulData;
-        return {
-            success: true,
-            bestMatkul: result.bestOptions,
-            bestMatkulIP: result.IP,
-            bestMatkulSKS: result.SKS,
-        };
-    } catch (error) {
-        return { success: false, errorMsg: (error as Error).message };
-    }
 }

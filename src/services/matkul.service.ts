@@ -36,7 +36,7 @@ export class MatkulService {
     static async findAvailable(fakultasName: string, semester: number) {
         const uri = `${baseUri}/find?fakultas=${fakultasName}&semester=${semester}`;
         const encodedUri = encodeURI(uri);
-        const response = await axiosInstance.get(encodedUri);
+        const response = await axiosInstance.get<Matkul[]>(encodedUri);
         return response.data;
     }
 
@@ -48,7 +48,7 @@ export class MatkulService {
     ) {
         const uri = `${baseUri}/find/bestOptions?fakultas=${fakultasName}&semester=${semester}&minSKS=${minSKS}&maxSKS=${maxSKS}`;
         const encodedUri = encodeURI(uri);
-        const response = await axiosInstance.get(encodedUri);
+        const response = await axiosInstance.get<BestMatkulData>(encodedUri);
         return response.data;
     }
 }
