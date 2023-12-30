@@ -9,8 +9,7 @@ export class FakultasService {
     }
 
     static async add(fakultas: Fakultas[]) {
-        const data = JSON.stringify(fakultas);
-        const response = await axiosInstance.post(baseUri, data);
+        const response = await axiosInstance.post(baseUri, fakultas);
         return response.data;
     }
 
