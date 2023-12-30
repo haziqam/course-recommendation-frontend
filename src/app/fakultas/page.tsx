@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AddFakultasDialog } from './AddFakultasDialog';
 import { useGetAllFakultas } from '@/hooks/useGetAllFakultas';
 import { DeleteFakultasDialog } from './DeleteFakultasDialog';

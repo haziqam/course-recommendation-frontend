@@ -9,8 +9,7 @@ export class JurusanService {
     }
 
     static async add(jurusan: Jurusan[]) {
-        const data = JSON.stringify(jurusan);
-        const response = await axiosInstance.post(baseUri, data);
+        const response = await axiosInstance.post(baseUri, jurusan);
         return response.data;
     }
 

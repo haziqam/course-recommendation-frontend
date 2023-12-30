@@ -1,24 +1,24 @@
 import { useToast } from '@/hooks/useToast';
-import { FakultasService } from '@/services/fakultas.service';
+import { JurusanService } from '@/services/jurusan.service';
 import { AxiosError } from 'axios';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { useMutation, useQueryClient } from 'react-query';
 
-export function DeleteFakultasDialog(props: {
+export function DeleteJurusanDialog(props: {
     visible: boolean;
     onHide: () => void;
-    fakultasToDelete: Fakultas | null;
+    jurusanToDelete: Jurusan | null;
 }) {
-    const { visible, onHide, fakultasToDelete } = props;
-    const queryClient = useQueryClient();
+    const { visible, onHide, jurusanToDelete } = props;
     const { toastRef, showSuccess, showError } = useToast();
+    const queryClient = useQueryClient();
     const mutation = useMutation({
-        mutationFn: FakultasService.remove,
+        mutationFn: JurusanService.remove,
         onSuccess: () => {
-            showSuccess('Fakultas berhasil dihapus');
-            queryClient.invalidateQueries(['allFakultas']);
+            showSuccess('Jurusan berhasil dihapus');
+            queryClient.invalidateQueries(['allJurusan']);
             onHide();
         },
         onError: (error) => {
@@ -29,8 +29,7 @@ export function DeleteFakultasDialog(props: {
             onHide();
         },
     });
-
-    return fakultasToDelete ? (
+    return jurusanToDelete ? (
         <>
             <Toast ref={toastRef} position="bottom-right" />
             <Dialog
@@ -42,7 +41,9 @@ export function DeleteFakultasDialog(props: {
                 footer={
                     <DialogFooter
                         onClose={onHide}
-                        onDelete={() => mutation.mutate(fakultasToDelete)}
+                        onDelete={() => {
+                            mutation.mutate(jurusanToDelete);
+                        }}
                     />
                 }
                 onHide={onHide}
@@ -60,7 +61,7 @@ export function DeleteFakultasDialog(props: {
                         }}
                     >
                         Anda yakin ingin menghapus{' '}
-                        <b>{fakultasToDelete.namaFakultas}</b>?
+                        <b>{jurusanToDelete.namaJurusan}</b>?
                     </span>
                 </div>
             </Dialog>
@@ -68,7 +69,10 @@ export function DeleteFakultasDialog(props: {
     ) : null;
 }
 
-function DialogFooter(props: { onClose: () => void; onDelete: () => void }) {
+export function DialogFooter(props: {
+    onClose: () => void;
+    onDelete: () => void;
+}) {
     const { onClose, onDelete } = props;
     return (
         <>

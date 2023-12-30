@@ -26,7 +26,11 @@ export function FakultasTable(props: {
                 header="Nama Fakultas"
                 sortable
             ></Column>
-            <Column body={actionBodyTemplate} exportable={false}></Column>
+            <Column
+                header="Actions"
+                body={actionBodyTemplate}
+                exportable={false}
+            ></Column>
         </DataTable>
     );
 }

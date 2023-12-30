@@ -9,8 +9,7 @@ export class MatkulService {
     }
 
     static async add(matkul: Matkul[]) {
-        const data = JSON.stringify(matkul);
-        const response = await axiosInstance.post(baseUri, data);
+        const response = await axiosInstance.post(baseUri, matkul);
         return response.data;
     }
 

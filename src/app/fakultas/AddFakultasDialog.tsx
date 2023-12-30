@@ -13,6 +13,7 @@ export function AddFakultasDialog(props: {
     onHide: () => void;
 }) {
     const [newFakultasName, setNewFakultasName] = useState('');
+    const { visible, onHide } = props;
     const { toastRef, showSuccess, showError } = useToast();
     const queryClient = useQueryClient();
     const mutation = useMutation({
@@ -34,7 +35,7 @@ export function AddFakultasDialog(props: {
 
     useEffect(() => {
         setNewFakultasName('');
-    }, [props.visible]);
+    }, [visible]);
 
     return (
         <>
@@ -42,9 +43,9 @@ export function AddFakultasDialog(props: {
             <Dialog
                 header="Tambahkan fakultas baru"
                 pt={{ header: { style: { paddingBottom: '0' } } }}
-                visible={props.visible}
+                visible={visible}
                 style={{ width: '35vw' }}
-                onHide={props.onHide}
+                onHide={onHide}
                 blockScroll
             >
                 <span className="p-float-label" style={{ marginTop: '24px' }}>
@@ -64,7 +65,7 @@ export function AddFakultasDialog(props: {
                     disabled={newFakultasName === ''}
                     onClick={() => {
                         mutation.mutate([{ namaFakultas: newFakultasName }]);
-                        props.onHide();
+                        onHide();
                     }}
                 />
             </Dialog>
