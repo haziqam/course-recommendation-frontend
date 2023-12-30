@@ -8,7 +8,6 @@ import { Panel } from 'primereact/panel';
 import { useEffect, useRef, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import { Navbar } from '@/shared-components/Navbar';
 import { Toast } from 'primereact/toast';
 import { showError, showSuccess } from '@/util/toastFunctions';
 import sharedStyles from '../shared.module.css';
@@ -55,9 +54,7 @@ export default function Page() {
 
     return (
         <div>
-            <Navbar />
             <Toast ref={toastRef} position="bottom-right" />
-            <div style={{ marginTop: '54px', paddingBottom: '32px' }}></div>
             <Panel header="Cari matkul" style={panelStyle}>
                 <div>
                     <label htmlFor="namaFakultas" style={labelStyle}>

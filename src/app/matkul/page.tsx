@@ -6,10 +6,9 @@ import 'primeicons/primeicons.css';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { FileUpload } from 'primereact/fileupload';
-import { Navbar } from '@/shared-components/Navbar';
 import { updateRender } from '@/util/updateRender';
 import { fetchAllData } from '@/util/fetchAllData';
-import { MatkulTable } from './MatkulTable';
+import { MatkulTable } from './matkulTable';
 import { Toast } from 'primereact/toast';
 import { showError, showSuccess } from '@/util/toastFunctions';
 import sharedStyles from '../shared.module.css';
@@ -72,8 +71,6 @@ export default function Page() {
 
     return (
         <div>
-            <Navbar />
-            <div style={{ marginTop: '54px', paddingBottom: '32px' }}></div>
             <Toast ref={toastRef} position="bottom-right" />
             <AddMatkulDialog
                 visible={showAddDialog}

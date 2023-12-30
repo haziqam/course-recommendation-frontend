@@ -1,13 +1,16 @@
 .navbar {
-    position: absolute;
+    position: sticky;
     top: 0;
     left: 0;
     width: 100%;
     background-color: rgb(42, 42, 42);
+    padding: 16px 0;
+    z-index: 100;
 }
 
 .navbar > ul {
     list-style: none;
+    margin: 0;
 }
 
 .navbarLinks {

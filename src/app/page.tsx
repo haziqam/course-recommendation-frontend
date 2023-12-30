@@ -2,7 +2,6 @@
 import 'primereact/resources/primereact.min.css';
 import 'primereact/resources/themes/lara-light-blue/theme.css';
 import { Button } from 'primereact/button';
-import { Navbar } from '@/shared-components/Navbar';
 
 export default function Home() {
     return (
@@ -12,7 +11,6 @@ export default function Home() {
                 justifyContent: 'center',
             }}
         >
-            <Navbar />
             <div
                 style={{
                     width: '500px',
