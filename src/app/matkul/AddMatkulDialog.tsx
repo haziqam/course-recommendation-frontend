@@ -1,62 +1,64 @@
-import { fetchAllData } from '@/util/fetchAllData'
-import { showError, showSuccess } from '@/util/toastFunctions'
-import { Button } from 'primereact/button'
-import { Dialog } from 'primereact/dialog'
-import { DropdownProps, Dropdown } from 'primereact/dropdown'
-import { InputText } from 'primereact/inputtext'
-import { Toast } from 'primereact/toast'
-import { useState, useEffect } from 'react'
+import { fetchAllData } from '@/util/fetchAllData';
+import { showError, showSuccess } from '@/util/toastFunctions';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import { DropdownProps, Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { Toast } from 'primereact/toast';
+import { useState, useEffect } from 'react';
 
 export function AddMatkulDialog(props: {
-    visible: boolean
-    onHide: () => void
-    onSubmitSuccess: () => void
-    toastRef: React.RefObject<Toast>
+    visible: boolean;
+    onHide: () => void;
+    onSubmitSuccess: () => void;
+    toastRef: React.RefObject<Toast>;
 }) {
-    const [newMatkulName, setNewMatkulName] = useState('')
-    const [newMatkulSKS, setNewMatkulSKS] = useState('')
-    const [newMatkulMinSemester, setNewMatkulMinSemester] = useState('')
-    const [newMatkulPrediksiIndeks, setNewMatkulPrediksiIndeks] = useState('')
-    const [selectedJurusan, setSelectedJurusan] = useState<Jurusan | null>(null)
-    const [jurusanOptions, setJurusanOptions] = useState<Jurusan[]>([])
+    const [newMatkulName, setNewMatkulName] = useState('');
+    const [newMatkulSKS, setNewMatkulSKS] = useState('');
+    const [newMatkulMinSemester, setNewMatkulMinSemester] = useState('');
+    const [newMatkulPrediksiIndeks, setNewMatkulPrediksiIndeks] = useState('');
+    const [selectedJurusan, setSelectedJurusan] = useState<Jurusan | null>(
+        null
+    );
+    const [jurusanOptions, setJurusanOptions] = useState<Jurusan[]>([]);
 
     const resetFormData = () => {
-        setNewMatkulName('')
-        setNewMatkulSKS('')
-        setNewMatkulMinSemester('')
-        setNewMatkulPrediksiIndeks('')
-        setSelectedJurusan(null)
-    }
+        setNewMatkulName('');
+        setNewMatkulSKS('');
+        setNewMatkulMinSemester('');
+        setNewMatkulPrediksiIndeks('');
+        setSelectedJurusan(null);
+    };
 
     useEffect(() => {
-        resetFormData()
+        resetFormData();
         const fetchData = async () => {
-            const jurusanResponse = await fetchAllData('jurusan')
+            const jurusanResponse = await fetchAllData('jurusan');
             if (!jurusanResponse.success) {
                 alert(
                     `Failed to fetch jurusan options: ${jurusanResponse.errorMsg}`
-                )
-                return
+                );
+                return;
             }
-            setJurusanOptions(jurusanResponse.data)
-        }
-        fetchData()
-    }, [props.visible])
+            setJurusanOptions(jurusanResponse.data);
+        };
+        fetchData();
+    }, [props.visible]);
 
     const selectedJurusanTemplate = (option: Jurusan, props: DropdownProps) => {
         if (option) {
-            return <div>{option.namaJurusan}</div>
+            return <div>{option.namaJurusan}</div>;
         }
-        return <span>{props.placeholder}</span>
-    }
+        return <span>{props.placeholder}</span>;
+    };
 
     const jurusanOptionTemplate = (option: Jurusan) => {
         return (
             <div className="flex align-items-center">
                 <div>{option.namaJurusan}</div>
             </div>
-        )
-    }
+        );
+    };
 
     const dataNotFilled = () => {
         return (
@@ -65,8 +67,8 @@ export function AddMatkulDialog(props: {
             newMatkulSKS === '' ||
             newMatkulMinSemester === '' ||
             newMatkulPrediksiIndeks === ''
-        )
-    }
+        );
+    };
 
     return (
         <Dialog
@@ -98,7 +100,7 @@ export function AddMatkulDialog(props: {
                     pt={{ root: { style: { width: '300px' } } }}
                     value={newMatkulName}
                     onChange={(e) => {
-                        setNewMatkulName(e.target.value)
+                        setNewMatkulName(e.target.value);
                     }}
                 />
                 <label htmlFor="newMatkulName">Nama Matkul</label>
@@ -110,7 +112,7 @@ export function AddMatkulDialog(props: {
                     value={newMatkulMinSemester}
                     keyfilter="pint"
                     onChange={(e) => {
-                        setNewMatkulMinSemester(e.target.value)
+                        setNewMatkulMinSemester(e.target.value);
                     }}
                 />
                 <label htmlFor="newMatkulMinSemester">
@@ -124,7 +126,7 @@ export function AddMatkulDialog(props: {
                     value={newMatkulSKS}
                     keyfilter="pint"
                     onChange={(e) => {
-                        setNewMatkulSKS(e.target.value)
+                        setNewMatkulSKS(e.target.value);
                     }}
                 />
                 <label htmlFor="newMatkulSKS">SKS</label>
@@ -155,28 +157,28 @@ export function AddMatkulDialog(props: {
                                 minSemester: parseInt(newMatkulMinSemester),
                                 prediksiIndeks: newMatkulPrediksiIndeks,
                             },
-                        ])
+                        ]);
                         if (!result.success) {
                             showError(
                                 props.toastRef,
                                 `Gagal menambahkan matkul: ${result.errorMsg}. Pastikan data valid, ` +
                                     'nama matkul unik terhadap nama jurusan, serta nama jurusan teredia ' +
                                     'pada tabel jurusan'
-                            )
-                            return
+                            );
+                            return;
                         }
                         showSuccess(
                             props.toastRef,
                             'Berhasil menambahkan matkul'
-                        )
-                        props.onSubmitSuccess()
-                    }
-                    postData()
-                    props.onHide()
+                        );
+                        props.onSubmitSuccess();
+                    };
+                    postData();
+                    props.onHide();
                 }}
             />
         </Dialog>
-    )
+    );
 }
 
 async function addMatkul(matkul: Matkul[]) {
@@ -187,13 +189,13 @@ async function addMatkul(matkul: Matkul[]) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(matkul),
-        })
+        });
         if (!response.ok) {
-            const errorMsg = await response.json()
-            return { success: false, errorMsg: errorMsg.error as string }
+            const errorMsg = await response.json();
+            return { success: false, errorMsg: errorMsg.error as string };
         }
-        return { success: true }
+        return { success: true };
     } catch (error) {
-        return { success: false, errorMsg: (error as Error).message }
+        return { success: false, errorMsg: (error as Error).message };
     }
 }

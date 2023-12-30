@@ -1,21 +1,21 @@
-import { showError, showSuccess } from '@/util/toastFunctions'
-import { Button } from 'primereact/button'
-import { Dialog } from 'primereact/dialog'
-import { InputText } from 'primereact/inputtext'
-import { Toast } from 'primereact/toast'
-import { useState, useEffect } from 'react'
+import { showError, showSuccess } from '@/util/toastFunctions';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import { InputText } from 'primereact/inputtext';
+import { Toast } from 'primereact/toast';
+import { useState, useEffect } from 'react';
 
 export function AddFakultasDialog(props: {
-    visible: boolean
-    onHide: () => void
-    onSubmitSuccess: () => void
-    toastRef: React.RefObject<Toast>
+    visible: boolean;
+    onHide: () => void;
+    onSubmitSuccess: () => void;
+    toastRef: React.RefObject<Toast>;
 }) {
-    const [newFakultasName, setNewFakultasName] = useState('')
+    const [newFakultasName, setNewFakultasName] = useState('');
 
     useEffect(() => {
-        setNewFakultasName('')
-    }, [props.visible])
+        setNewFakultasName('');
+    }, [props.visible]);
 
     return (
         <Dialog
@@ -31,7 +31,7 @@ export function AddFakultasDialog(props: {
                     id="a"
                     value={newFakultasName}
                     onChange={(e) => {
-                        setNewFakultasName(e.target.value)
+                        setNewFakultasName(e.target.value);
                     }}
                 />
                 <label htmlFor="a">Nama Fakultas</label>
@@ -45,27 +45,27 @@ export function AddFakultasDialog(props: {
                     const postData = async () => {
                         const result = await addFakultas([
                             { namaFakultas: newFakultasName },
-                        ])
+                        ]);
                         if (!result.success) {
                             showError(
                                 props.toastRef,
                                 `Gagal menambahkan fakultas: ${result.errorMsg}. Pastikan atribut JSON valid dan lengkap,` +
                                     ' serta atribut fakultas unik'
-                            )
-                            return
+                            );
+                            return;
                         }
-                        props.onSubmitSuccess()
+                        props.onSubmitSuccess();
                         showSuccess(
                             props.toastRef,
                             'Berhasil menambahkan fakultas'
-                        )
-                    }
-                    postData()
-                    props.onHide()
+                        );
+                    };
+                    postData();
+                    props.onHide();
                 }}
             />
         </Dialog>
-    )
+    );
 }
 
 async function addFakultas(fakultas: Fakultas[]) {
@@ -76,13 +76,13 @@ async function addFakultas(fakultas: Fakultas[]) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(fakultas),
-        })
+        });
         if (!response.ok) {
-            const errorMsg = await response.json()
-            return { success: false, errorMsg: errorMsg.error as string }
+            const errorMsg = await response.json();
+            return { success: false, errorMsg: errorMsg.error as string };
         }
-        return { success: true }
+        return { success: true };
     } catch (error) {
-        return { success: false, errorMsg: (error as Error).message }
+        return { success: false, errorMsg: (error as Error).message };
     }
 }

@@ -1,36 +1,36 @@
-import { fetchAllData } from '@/util/fetchAllData'
-import { Button } from 'primereact/button'
-import { Dialog } from 'primereact/dialog'
-import { Dropdown } from 'primereact/dropdown'
-import { InputText } from 'primereact/inputtext'
-import { useState, useEffect } from 'react'
+import { fetchAllData } from '@/util/fetchAllData';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { useState, useEffect } from 'react';
 
 export function AddJurusanDialog(props: {
-    visible: boolean
-    onHide: () => void
-    onSubmitSuccess: () => void
+    visible: boolean;
+    onHide: () => void;
+    onSubmitSuccess: () => void;
 }) {
-    const [newJurusanName, setNewJurusanName] = useState('')
+    const [newJurusanName, setNewJurusanName] = useState('');
     const [selectedFakultas, setSelectedFakultas] = useState<Fakultas | null>(
         null
-    )
-    const [fakultasOptions, setFakultasOptions] = useState<Fakultas[]>([])
+    );
+    const [fakultasOptions, setFakultasOptions] = useState<Fakultas[]>([]);
 
     useEffect(() => {
-        setNewJurusanName('')
-        setSelectedFakultas(null)
+        setNewJurusanName('');
+        setSelectedFakultas(null);
         const fetchData = async () => {
-            const fakultasResponse = await fetchAllData('fakultas')
+            const fakultasResponse = await fetchAllData('fakultas');
             if (!fakultasResponse.success) {
                 alert(
                     `Failed to fetch fakultas options: ${fakultasResponse.errorMsg}`
-                )
-                return
+                );
+                return;
             }
-            setFakultasOptions(fakultasResponse.data)
-        }
-        fetchData()
-    }, [props.visible])
+            setFakultasOptions(fakultasResponse.data);
+        };
+        fetchData();
+    }, [props.visible]);
 
     return (
         <Dialog
@@ -57,7 +57,7 @@ export function AddJurusanDialog(props: {
                     id="newJurusanName"
                     value={newJurusanName}
                     onChange={(e) => {
-                        setNewJurusanName(e.target.value)
+                        setNewJurusanName(e.target.value);
                     }}
                 />
                 <label htmlFor="newJurusanName">Nama Jurusan</label>
@@ -74,22 +74,22 @@ export function AddJurusanDialog(props: {
                                 namaJurusan: newJurusanName,
                                 namaFakultas: selectedFakultas!.namaFakultas,
                             },
-                        ])
+                        ]);
                         if (!result.success) {
                             console.error(
                                 'Failed to add jurusan:',
                                 result.errorMsg
-                            )
-                            return
+                            );
+                            return;
                         }
-                        props.onSubmitSuccess()
-                    }
-                    postData()
-                    props.onHide()
+                        props.onSubmitSuccess();
+                    };
+                    postData();
+                    props.onHide();
                 }}
             />
         </Dialog>
-    )
+    );
 }
 
 async function addJurusan(jurusan: Jurusan[]) {
@@ -100,13 +100,13 @@ async function addJurusan(jurusan: Jurusan[]) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(jurusan),
-        })
+        });
         if (!response.ok) {
-            const errorMsg = await response.json()
-            return { success: false, errorMsg: errorMsg.error as string }
+            const errorMsg = await response.json();
+            return { success: false, errorMsg: errorMsg.error as string };
         }
-        return { success: true }
+        return { success: true };
     } catch (error) {
-        return { success: false, errorMsg: (error as Error).message }
+        return { success: false, errorMsg: (error as Error).message };
     }
 }

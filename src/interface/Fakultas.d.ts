@@ -1,3 +1,0 @@
-interface Fakultas {
-    namaFakultas: string
-}

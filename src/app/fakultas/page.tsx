@@ -1,53 +1,53 @@
-'use client'
-import React, { useEffect, useRef, useState } from 'react'
-import 'primereact/resources/primereact.min.css'
-import 'primereact/resources/themes/lara-light-blue/theme.css'
-import 'primeicons/primeicons.css'
-import { DataTable } from 'primereact/datatable'
-import { Column } from 'primereact/column'
-import { Button } from 'primereact/button'
-import { Toolbar } from 'primereact/toolbar'
-import { Dialog } from 'primereact/dialog'
-import { FileUpload } from 'primereact/fileupload'
-import { Navbar } from '@/components/Navbar'
-import { updateRender } from '@/util/updateRender'
-import { fetchAllData } from '@/util/fetchAllData'
-import { Toast } from 'primereact/toast'
-import { showError, showSuccess } from '@/util/toastFunctions'
-import { AddFakultasDialog } from './AddFakultasDialog'
-import sharedStyles from '../shared.module.css'
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
+import 'primereact/resources/primereact.min.css';
+import 'primereact/resources/themes/lara-light-blue/theme.css';
+import 'primeicons/primeicons.css';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
+import { Toolbar } from 'primereact/toolbar';
+import { Dialog } from 'primereact/dialog';
+import { FileUpload } from 'primereact/fileupload';
+import { Navbar } from '@/shared-components/Navbar';
+import { updateRender } from '@/util/updateRender';
+import { fetchAllData } from '@/util/fetchAllData';
+import { Toast } from 'primereact/toast';
+import { showError, showSuccess } from '@/util/toastFunctions';
+import { AddFakultasDialog } from './AddFakultasDialog';
+import sharedStyles from '../shared.module.css';
 
 export default function Page() {
-    const [allFakultas, setAllFakultas] = useState<Fakultas[]>()
-    const [showAddDialog, setShowAddDialog] = useState(false)
-    const [tableRenderHelper, setTableRenderHelper] = useState(false)
+    const [allFakultas, setAllFakultas] = useState<Fakultas[]>();
+    const [showAddDialog, setShowAddDialog] = useState(false);
+    const [tableRenderHelper, setTableRenderHelper] = useState(false);
     const [fakultasToDelete, setFakultasToDelete] = useState<Fakultas | null>(
         null
-    )
+    );
     const [showDeleteFakultasDialog, setShowDeleteFakultasDialog] =
-        useState(false)
-    const toastRef = useRef<Toast>(null)
+        useState(false);
+    const toastRef = useRef<Toast>(null);
 
     const hideDeleteFakultasDialog = () => {
-        setShowDeleteFakultasDialog(false)
-    }
+        setShowDeleteFakultasDialog(false);
+    };
 
     const confirmDeleteFakultas = (fakultas: Fakultas) => {
-        setFakultasToDelete(fakultas)
-        setShowDeleteFakultasDialog(true)
-    }
+        setFakultasToDelete(fakultas);
+        setShowDeleteFakultasDialog(true);
+    };
 
     const deleteFakultas = async () => {
-        const result = await removeFakultas(fakultasToDelete!)
+        const result = await removeFakultas(fakultasToDelete!);
         if (!result.success) {
-            showError(toastRef, `Gagal menghapus fakultas: ${result.errorMsg}`)
+            showError(toastRef, `Gagal menghapus fakultas: ${result.errorMsg}`);
         } else {
-            showSuccess(toastRef, 'Fakultas berhasil dihapus')
+            showSuccess(toastRef, 'Fakultas berhasil dihapus');
         }
-        hideDeleteFakultasDialog()
-        setFakultasToDelete(null)
-        updateRender(tableRenderHelper, setTableRenderHelper)
-    }
+        hideDeleteFakultasDialog();
+        setFakultasToDelete(null);
+        updateRender(tableRenderHelper, setTableRenderHelper);
+    };
 
     const deleteFakultasDialogFooter = (
         <React.Fragment>
@@ -64,7 +64,7 @@ export default function Page() {
                 onClick={deleteFakultas}
             />
         </React.Fragment>
-    )
+    );
 
     const actionBodyTemplate = (rowData: Fakultas) => {
         return (
@@ -77,8 +77,8 @@ export default function Page() {
                     onClick={() => confirmDeleteFakultas(rowData)}
                 />
             </React.Fragment>
-        )
-    }
+        );
+    };
 
     const DeleteFakultasDialog = () => {
         return (
@@ -110,21 +110,20 @@ export default function Page() {
                     )}
                 </div>
             </Dialog>
-        )
-    }
+        );
+    };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const result = await fetchAllData('fakultas')
-            if (!result.success) {
-                alert(`Failed to fetch fakultas: ${result.errorMsg}`)
-                return
-            }
-            setAllFakultas(result.data)
+    const fetchData = async () => {
+        const result = await fetchAllData('fakultas');
+        if (!result.success) {
+            alert(`Failed to fetch fakultas: ${result.errorMsg}`);
+            return;
         }
-
-        fetchData()
-    }, [tableRenderHelper])
+        setAllFakultas(result.data);
+    };
+    useEffect(() => {
+        fetchData();
+    }, [tableRenderHelper]);
 
     const startContent = (
         <React.Fragment>
@@ -134,7 +133,7 @@ export default function Page() {
                 icon="pi pi-plus"
                 className="mr-2"
                 onClick={(e) => {
-                    setShowAddDialog(true)
+                    setShowAddDialog(true);
                 }}
             />
             <FileUpload
@@ -146,20 +145,20 @@ export default function Page() {
                 auto
                 chooseLabel="Batch upload (JSON file)"
                 onUpload={(e) => {
-                    updateRender(tableRenderHelper, setTableRenderHelper)
-                    showSuccess(toastRef, 'Berhasil menambahkan fakultas')
+                    updateRender(tableRenderHelper, setTableRenderHelper);
+                    showSuccess(toastRef, 'Berhasil menambahkan fakultas');
                 }}
                 onError={(e) => {
-                    const response = JSON.parse(e.xhr.response)
+                    const response = JSON.parse(e.xhr.response);
                     showError(
                         toastRef,
                         `Gagal menambahkan fakultas: ${response.error}. Pastikan atribut JSON valid dan lengkap,` +
                             ' serta atribut fakultas unik'
-                    )
+                    );
                 }}
             />
         </React.Fragment>
-    )
+    );
 
     return (
         <div>
@@ -169,10 +168,11 @@ export default function Page() {
             <AddFakultasDialog
                 visible={showAddDialog}
                 onHide={() => {
-                    setShowAddDialog(false)
+                    setShowAddDialog(false);
                 }}
                 onSubmitSuccess={() => {
-                    updateRender(tableRenderHelper, setTableRenderHelper)
+                    updateRender(tableRenderHelper, setTableRenderHelper);
+                    // fetchData();
                 }}
                 toastRef={toastRef}
             />
@@ -194,11 +194,11 @@ export default function Page() {
                 </DataTable>
             </div>
         </div>
-    )
+    );
 }
 
 async function removeFakultas(fakultas: Fakultas) {
-    const encodedNamaFakultas = encodeURIComponent(fakultas.namaFakultas)
+    const encodedNamaFakultas = encodeURIComponent(fakultas.namaFakultas);
     try {
         const response = await fetch(
             `http://localhost:5000/fakultas?fakultas=${encodedNamaFakultas}`,
@@ -208,14 +208,14 @@ async function removeFakultas(fakultas: Fakultas) {
                     'Content-Type': 'application/json',
                 },
             }
-        )
+        );
 
         if (!response.ok) {
-            const errorMsg = await response.json()
-            return { success: false, errorMsg: errorMsg.error as string }
+            const errorMsg = await response.json();
+            return { success: false, errorMsg: errorMsg.error as string };
         }
-        return { success: true }
+        return { success: true };
     } catch (error) {
-        return { success: false, errorMsg: (error as Error).message }
+        return { success: false, errorMsg: (error as Error).message };
     }
 }

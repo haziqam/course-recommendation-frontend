@@ -1,7 +1,5 @@
-import React from 'react'
-import styles from './components.module.css'
-// import "primereact/resources/primereact.min.css";
-// import "primereact/resources/themes/lara-light-blue/theme.css";
+import React from 'react';
+import styles from './components.module.css';
 
 export function Navbar() {
     return (
@@ -34,5 +32,5 @@ export function Navbar() {
                 </li>
             </ul>
         </nav>
-    )
+    );
 }

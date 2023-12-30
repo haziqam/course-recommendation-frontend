@@ -1,40 +1,40 @@
-import { showError, showSuccess } from '@/util/toastFunctions'
-import { Button } from 'primereact/button'
-import { Column } from 'primereact/column'
-import { DataTable } from 'primereact/datatable'
-import { Dialog } from 'primereact/dialog'
-import { Toast } from 'primereact/toast'
-import React, { useRef, useState } from 'react'
+import { showError, showSuccess } from '@/util/toastFunctions';
+import { Button } from 'primereact/button';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+import { Dialog } from 'primereact/dialog';
+import { Toast } from 'primereact/toast';
+import React, { useRef, useState } from 'react';
 
 export function MatkulTable(props: {
-    allMatkul: Matkul[]
-    isDeletable: boolean
-    onModify?: () => void
+    allMatkul: Matkul[];
+    isDeletable: boolean;
+    onModify?: () => void;
 }) {
-    const [matkulToDelete, setMatkulToDelete] = useState<Matkul | null>(null)
-    const [showDeleteMatkulDialog, setShowDeleteMatkulDialog] = useState(false)
-    const toastRef = useRef<Toast>(null)
+    const [matkulToDelete, setMatkulToDelete] = useState<Matkul | null>(null);
+    const [showDeleteMatkulDialog, setShowDeleteMatkulDialog] = useState(false);
+    const toastRef = useRef<Toast>(null);
 
     const hideDeleteMatkulDialog = () => {
-        setShowDeleteMatkulDialog(false)
-    }
+        setShowDeleteMatkulDialog(false);
+    };
 
     const confirmDeleteMatkul = (matkul: Matkul) => {
-        setMatkulToDelete(matkul)
-        setShowDeleteMatkulDialog(true)
-    }
+        setMatkulToDelete(matkul);
+        setShowDeleteMatkulDialog(true);
+    };
 
     const deleteMatkul = async () => {
-        const result = await removeMatkul(matkulToDelete!)
+        const result = await removeMatkul(matkulToDelete!);
         if (!result.success) {
-            showError(toastRef, `Gagal menghapus matkul: ${result.errorMsg}`)
+            showError(toastRef, `Gagal menghapus matkul: ${result.errorMsg}`);
         } else {
-            showSuccess(toastRef, 'Matkul berhasil dihapus')
+            showSuccess(toastRef, 'Matkul berhasil dihapus');
         }
-        hideDeleteMatkulDialog()
-        setMatkulToDelete(null)
-        if (props.onModify !== undefined) props.onModify()
-    }
+        hideDeleteMatkulDialog();
+        setMatkulToDelete(null);
+        if (props.onModify !== undefined) props.onModify();
+    };
 
     const deleteMatkulDialogFooter = (
         <React.Fragment>
@@ -51,7 +51,7 @@ export function MatkulTable(props: {
                 onClick={deleteMatkul}
             />
         </React.Fragment>
-    )
+    );
 
     const actionBodyTemplate = (rowData: Matkul) => {
         return (
@@ -64,8 +64,8 @@ export function MatkulTable(props: {
                     onClick={() => confirmDeleteMatkul(rowData)}
                 />
             </React.Fragment>
-        )
-    }
+        );
+    };
 
     const DeleteMatkulDialog = () => {
         return (
@@ -97,8 +97,8 @@ export function MatkulTable(props: {
                     )}
                 </div>
             </Dialog>
-        )
-    }
+        );
+    };
 
     return (
         <div>
@@ -134,12 +134,12 @@ export function MatkulTable(props: {
                 )}
             </DataTable>
         </div>
-    )
+    );
 }
 
 async function removeMatkul(matkul: Matkul) {
-    const encodedNamaMatkul = encodeURIComponent(matkul.namaMatkul)
-    const encodedNamaJurusan = encodeURIComponent(matkul.namaJurusan)
+    const encodedNamaMatkul = encodeURIComponent(matkul.namaMatkul);
+    const encodedNamaJurusan = encodeURIComponent(matkul.namaJurusan);
     try {
         const response = await fetch(
             `http://localhost:5000/matkul?matkul=${encodedNamaMatkul}&jurusan=${encodedNamaJurusan}`,
@@ -149,14 +149,14 @@ async function removeMatkul(matkul: Matkul) {
                     'Content-Type': 'application/json',
                 },
             }
-        )
+        );
 
         if (!response.ok) {
-            const errorMsg = await response.json()
-            return { success: false, errorMsg: errorMsg.error as string }
+            const errorMsg = await response.json();
+            return { success: false, errorMsg: errorMsg.error as string };
         }
-        return { success: true }
+        return { success: true };
     } catch (error) {
-        return { success: false, errorMsg: (error as Error).message }
+        return { success: false, errorMsg: (error as Error).message };
     }
 }
