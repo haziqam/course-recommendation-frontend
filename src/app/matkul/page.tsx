@@ -1,98 +1,62 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { MatkulTable } from './MatkulTable';
+import { AddMatkulDialog } from './AddMatkulDialog';
+import { useGetAllMatkul } from '@/hooks/useGetAllMatkul';
+import sharedStyles from '../shared.module.css';
 import 'primereact/resources/primereact.min.css';
 import 'primereact/resources/themes/lara-light-blue/theme.css';
 import 'primeicons/primeicons.css';
-import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
-import { FileUpload } from 'primereact/fileupload';
-import { updateRender } from '@/util/updateRender';
-import { fetchAllData } from '@/util/fetchAllData';
-import { MatkulTable } from './matkulTable';
-import { Toast } from 'primereact/toast';
-import { showError, showSuccess } from '@/util/toastFunctions';
-import sharedStyles from '../shared.module.css';
-import { AddMatkulDialog } from './AddMatkulDialog';
+import { MatkulToolbar } from './MatkulToolbar';
+import { LoadingSpinner } from '@/shared-components/LoadingSpinner';
+import { Message } from 'primereact/message';
+import { DeleteMatkulDialog } from './DeleteMatkulDialog';
 
 export default function Page() {
-    const [allMatkul, setAllMatkul] = useState<Matkul[]>([]);
-    const [showAddDialog, setShowAddDialog] = useState(false);
-    const [tableRenderHelper, setTableRenderHelper] = useState(false);
-    const toastRef = useRef<Toast>(null);
+    const { data: allMatkul, isLoading, isError } = useGetAllMatkul();
+    const [showAddMatkulDialog, setShowAddMatkulDialog] = useState(false);
+    const [showDeleteMatkulDialog, setShowDeleteMatkulDialog] = useState(false);
+    const [matkulToDelete, setMatkulToDelete] = useState<Matkul | null>(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const result = await fetchAllData('matkul');
-            if (!result.success) {
-                console.error('Failed to fetch matkul:', result.errorMsg);
-                return;
-            }
-            setAllMatkul(result.data);
-        };
-
-        fetchData();
-    }, [tableRenderHelper]);
-
-    const toolbarContent = (
-        <React.Fragment>
-            <Button
-                label="New"
-                icon="pi pi-plus"
-                className="mr-2"
-                pt={{ root: { style: { marginRight: '16px' } } }}
-                onClick={(e) => {
-                    setShowAddDialog(true);
-                }}
-            />
-            <FileUpload
-                mode="basic"
-                name="Matkul[]"
-                url="http://localhost:5000/matkul/addFromFile"
-                accept=".json"
-                maxFileSize={1000000}
-                auto
-                chooseLabel="Batch upload (JSON file)"
-                onUpload={(e) => {
-                    showSuccess(toastRef, 'Berhasil menambahkan matkul');
-                    updateRender(tableRenderHelper, setTableRenderHelper);
-                }}
-                onError={(e) => {
-                    const response = JSON.parse(e.xhr.response);
-                    showError(
-                        toastRef,
-                        `Gagal menambahkan matkul: ${response.error}. Pastikan atribut JSON valid dan lengkap,` +
-                            ' namaMatkul harus unik terhadap namaJurusan, serta namaJurusan' +
-                            ' tersedia pada tabel jurusan'
-                    );
-                }}
-            />
-        </React.Fragment>
-    );
+    const confirmDeleteMatkul = (matkul: Matkul) => {
+        setMatkulToDelete(matkul);
+        setShowDeleteMatkulDialog(true);
+    };
 
     return (
         <div>
-            <Toast ref={toastRef} position="bottom-right" />
             <AddMatkulDialog
-                visible={showAddDialog}
+                visible={showAddMatkulDialog}
                 onHide={() => {
-                    setShowAddDialog(false);
+                    setShowAddMatkulDialog(false);
                 }}
-                onSubmitSuccess={() => {
-                    updateRender(tableRenderHelper, setTableRenderHelper);
+            />
+            <DeleteMatkulDialog
+                visible={showDeleteMatkulDialog}
+                onHide={() => {
+                    setShowDeleteMatkulDialog(false);
                 }}
-                toastRef={toastRef}
+                matkulToDelete={matkulToDelete}
             />
             <div className={sharedStyles.tableStyle}>
-                <div style={{ paddingBottom: '32px' }}>
-                    <Toolbar start={toolbarContent} />
-                </div>
-                <MatkulTable
-                    allMatkul={allMatkul}
-                    isDeletable={true}
-                    onModify={() => {
-                        updateRender(tableRenderHelper, setTableRenderHelper);
+                <MatkulToolbar
+                    onAddJurusanClick={() => {
+                        setShowAddMatkulDialog(true);
                     }}
                 />
+                {isLoading ? (
+                    <LoadingSpinner message="Loading jurusan data" />
+                ) : isError ? (
+                    <Message
+                        severity="error"
+                        text="An error occurred while fetching jurusan data"
+                    />
+                ) : (
+                    <MatkulTable
+                        allMatkul={allMatkul!}
+                        onDeleteMatkul={confirmDeleteMatkul}
+                    />
+                )}
             </div>
         </div>
     );

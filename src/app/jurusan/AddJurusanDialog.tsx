@@ -33,6 +33,7 @@ export function AddJurusanDialog(props: {
         onSuccess: () => {
             showSuccess('Berhasil menambahkan jurusan');
             queryClient.invalidateQueries(['allJurusan']);
+            onHide();
         },
         onError: (error) => {
             if (error instanceof AxiosError) {
@@ -42,6 +43,7 @@ export function AddJurusanDialog(props: {
                         ' serta atribut jurusan unik'
                 );
             }
+            onHide();
         },
     });
 
@@ -104,7 +106,7 @@ export function AddJurusanDialog(props: {
                             pt={{ root: { style: { marginTop: '24px' } } }}
                             icon="pi pi-check"
                             disabled={!(newJurusanName && selectedFakultas)}
-                            onClick={(e) => {
+                            onClick={() => {
                                 mutation.mutate([
                                     {
                                         namaJurusan: newJurusanName,
@@ -112,7 +114,6 @@ export function AddJurusanDialog(props: {
                                             selectedFakultas?.namaFakultas!,
                                     },
                                 ]);
-                                props.onHide();
                             }}
                         />
                     </>

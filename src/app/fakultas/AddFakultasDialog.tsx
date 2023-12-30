@@ -21,6 +21,7 @@ export function AddFakultasDialog(props: {
         onSuccess: () => {
             showSuccess('Berhasil menambahkan fakultas');
             queryClient.invalidateQueries(['allFakultas']);
+            onHide();
         },
         onError: (error) => {
             if (error instanceof AxiosError) {
@@ -30,6 +31,7 @@ export function AddFakultasDialog(props: {
                         ' serta atribut fakultas unik'
                 );
             }
+            onHide();
         },
     });
 
@@ -65,7 +67,6 @@ export function AddFakultasDialog(props: {
                     disabled={newFakultasName === ''}
                     onClick={() => {
                         mutation.mutate([{ namaFakultas: newFakultasName }]);
-                        onHide();
                     }}
                 />
             </Dialog>

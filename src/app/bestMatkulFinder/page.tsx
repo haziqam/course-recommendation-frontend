@@ -1,7 +1,4 @@
 'use client';
-import 'primereact/resources/primereact.min.css';
-import 'primereact/resources/themes/lara-light-blue/theme.css';
-import 'primeicons/primeicons.css';
 import { fetchAllData } from '@/util/fetchAllData';
 import { Dropdown } from 'primereact/dropdown';
 import { Panel } from 'primereact/panel';
@@ -11,7 +8,10 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { showError, showSuccess } from '@/util/toastFunctions';
 import sharedStyles from '../shared.module.css';
-import { MatkulTable } from '../matkul/matkulTable';
+import { MatkulTable } from '../matkul/MatkulTable';
+import 'primereact/resources/primereact.min.css';
+import 'primereact/resources/themes/lara-light-blue/theme.css';
+import 'primeicons/primeicons.css';
 
 export default function Page() {
     const [fakultasOptions, setFakultasOptions] = useState<Fakultas[]>([]);
